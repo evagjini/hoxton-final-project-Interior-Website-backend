@@ -16,21 +16,21 @@ model User {
   lastName String
   email    String    @unique
   password String
-  role     String    @default("User")
   comments Comment[]
   likes    Likes[]
 }
 
 model Blog {
-  id         Int        @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   title      String
-  image      String
   content    String
-  categories Category[]
-  designer   Designer   @relation(fields: [designerId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id])
+  designer   Designer  @relation(fields: [designerId], references: [id])
   designerId Int
   comments   Comment[]
   likes      Likes[]
+  categoryId Int
+  images     Image[]
 }
 
 model Category {
@@ -42,7 +42,7 @@ model Category {
 model Designer {
   id       Int    @id @default(autoincrement())
   fullName String
-  blog     Blog[]
+  blogs    Blog[]
   blogId   Int
 }
 
@@ -60,5 +60,12 @@ model Likes {
   user   User @relation(fields: [userId], references: [id])
   blog   Blog @relation(fields: [blogId], references: [id])
   userId Int
+  blogId Int
+}
+
+model Image {
+  id     Int    @id
+  image  String
+  blog   Blog   @relation(fields: [blogId], references: [id])
   blogId Int
 }

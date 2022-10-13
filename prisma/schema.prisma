@@ -64,7 +64,7 @@ model Likes {
 }
 
 model Image {
-  id     Int    @id
+  id     Int    @id @default(autoincrement())
   image  String
   blog   Blog   @relation(fields: [blogId], references: [id])
   blogId Int

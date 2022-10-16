@@ -41,7 +41,10 @@ model Category {
 
 model Designer {
   id       Int    @id @default(autoincrement())
-  fullName String
+  name     String
+  lastName String
+  email    String @unique
+  password String
   blogs    Blog[]
   blogId   Int
 }

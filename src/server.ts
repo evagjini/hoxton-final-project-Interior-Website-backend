@@ -28,6 +28,15 @@ async function getCurrentUser (token :string){
     const user = await prisma.user.findUnique({where: {id :id} });
   return user;
 }
+async function getCurrentDesigner (token :string){
+  // @ts-ignore
+  const {id} = jwt.verify(token, SECRET);
+  const user = await prisma.designer.findUnique({where: {id :id} });
+return user;
+}
+
+
+
 
 const port = 5637;
 
@@ -40,7 +49,7 @@ app.get("/blogs", async (req, res) => {
         res.send(blogs)
     } catch (error){
         // @ts-ignore
-        res.status(400).send({errors:error.message})
+        res.status(400).send({error:error.message})
     }
 });
 app.get('/blog/:id', async (req,res)=>{
@@ -92,7 +101,7 @@ app.get('/categories/:id', async (req,res) =>{
 } )
 
 
-app.post("/sign-up", async (req, res) => {
+app.post("/sign-up/user", async (req, res) => {
   try {
     const match = await prisma.user.findUnique({
       where: { email: req.body.email },
@@ -116,17 +125,39 @@ app.post("/sign-up", async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
-app.post("/sign-in", async (req, res) => {
-  const user = await prisma.user.findUnique({
+app.post("/sign-in/user", async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
     where: { email: req.body.email },
   });
   if (user && bcrypt.compareSync(req.body.password, user.password)) {
     res.send({user:user , token:getToken(user.id)});
-  } else {
-    res.status(400).send({ error: "Invalid email/password" });
+  } 
+else {
+    res.status(400).send({ message: "Invalid email/password" });
   }
+}catch (error){
+  // @ts-ignore
+  res.status(400).send({error:error.message})
+}
 });
-app.get('/validate', async (req,res)=>{
+app.post("/sign-in/designer", async (req, res) => {
+  try {
+    const designer = await prisma.designer.findUnique({
+    where: { email: req.body.email },
+  });
+  if (designer && bcrypt.compareSync(req.body.password, designer.password)) {
+    res.send({designer:designer , token:getToken(designer.id)});
+  } 
+else {
+    res.status(400).send({ message: "Invalid email/password" });
+  }
+}catch (error){
+  // @ts-ignore
+  res.send(400).send({error:error.message})
+}
+});
+app.get('/validate/user', async (req,res)=>{
     try{
         if(req.headers.authorization){
             const user = await getCurrentUser(req.headers.authorization);
@@ -140,6 +171,21 @@ app.get('/validate', async (req,res)=>{
         }
     }
 );
+app.get('/validate/designer', async (req,res)=>{
+  try{
+      if(req.headers.authorization){
+          const designer = await getCurrentDesigner(req.headers.authorization);
+          // @ts-ignore
+          res.send({designer, token : getToken(designer.id)})
+
+      } 
+  }catch (error){
+          // @ts-ignore
+         res.status(400).send({error:error.message})
+      }
+  }
+);
+
 app.listen(port, () => {
   console.log(`yay: http://localhost:${port}`)
 })

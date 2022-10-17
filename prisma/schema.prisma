@@ -23,7 +23,6 @@ model User {
 model Blog {
   id         Int       @id @default(autoincrement())
   title      String
-  content    String
   category   Category  @relation(fields: [categoryId], references: [id])
   designer   Designer  @relation(fields: [designerId], references: [id])
   designerId Int
@@ -31,6 +30,7 @@ model Blog {
   likes      Likes[]
   categoryId Int
   images     Image[]
+  created_at DateTime
 }
 
 model Category {
@@ -46,7 +46,6 @@ model Designer {
   email    String @unique
   password String
   blogs    Blog[]
-  blogId   Int
 }
 
 model Comment {
@@ -67,8 +66,9 @@ model Likes {
 }
 
 model Image {
-  id     Int    @id @default(autoincrement())
-  image  String
-  blog   Blog   @relation(fields: [blogId], references: [id])
-  blogId Int
+  id          Int    @id @default(autoincrement())
+  image       String
+  description String
+  blog        Blog   @relation(fields: [blogId], references: [id])
+  blogId      Int
 }

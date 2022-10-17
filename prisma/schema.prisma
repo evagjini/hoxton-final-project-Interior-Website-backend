@@ -23,8 +23,8 @@ model User {
 model Blog {
   id         Int       @id @default(autoincrement())
   title      String
-  category   Category  @relation(fields: [categoryId], references: [id])
-  designer   Designer  @relation(fields: [designerId], references: [id])
+  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  designer   Designer  @relation(fields: [designerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   designerId Int
   comments   Comment[]
   likes      Likes[]
@@ -51,16 +51,16 @@ model Designer {
 model Comment {
   id      Int    @id @default(autoincrement())
   comment String
-  user    User   @relation(fields: [userId], references: [id])
-  blog    Blog   @relation(fields: [blogId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  blog    Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId  Int
   blogId  Int
 }
 
 model Likes {
   id     Int  @id @default(autoincrement())
-  user   User @relation(fields: [userId], references: [id])
-  blog   Blog @relation(fields: [blogId], references: [id])
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  blog   Blog @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   userId Int
   blogId Int
 }
@@ -69,6 +69,6 @@ model Image {
   id          Int    @id @default(autoincrement())
   image       String
   description String
-  blog        Blog   @relation(fields: [blogId], references: [id])
+  blog        Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   blogId      Int
 }

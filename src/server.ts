@@ -239,40 +239,40 @@ app.get("/likes", async (req, res) => {
 
 // like a post
 
-app.post("/likeblog", async (req, res) => {
-  try {
-    const { blogId, userId } = req.body;
-    if (!blogId || !userId) {
-      res.status(400).send("Cannot create like!");
-    }
-    const likes = await prisma.likes.create({
-      data: {
-        blogId: blogId,
-        userId: userId,
-      },
-    });
+// app.post("/likeblog", async (req, res) => {
+//   try {
+//     const { blogId, userId } = req.body;
+//     if (!blogId || !userId) {
+//       res.status(400).send("Cannot create like!");
+//     }
+//     const likes = await prisma.likes.create({
+//       data: {
+//         blogId: blogId,
+//         userId: userId,
+//       },
+//     });
 
-    // const blog = await prisma.blog.findUnique({
-    //   where: { id: Number(req.params.id) },
-    //   include: { likes: { include: { user: true } } },
-    // });
+//     // const blog = await prisma.blog.findUnique({
+//     //   where: { id: Number(req.params.id) },
+//     //   include: { likes: { include: { user: true } } },
+//     // });
 
-    // if (blog) {
-    //   const like = await prisma.likes.create({
-    //     data: {
-    //       blogId: blog.id,
-    //       userId: user.id,
-    //     },
-    //   });
-    //   res.send(like);
-    // } else {
-    //   res.status(404).send("Blog not found");
-    // }
-  } catch (error) {
-    //@ts-ignore
-    res.status(400).send({ error: error.message });
-  }
-});
+//     // if (blog) {
+//     //   const like = await prisma.likes.create({
+//     //     data: {
+//     //       blogId: blog.id,
+//     //       userId: user.id,
+//     //     },
+//     //   });
+//     //   res.send(like);
+//     // } else {
+//     //   res.status(404).send("Blog not found");
+//     // }
+//   } catch (error) {
+//     //@ts-ignore
+//     res.status(400).send({ error: error.message });
+//   }
+// });
 
 app.listen(port, () => {
   console.log(`yay: http://localhost:${port}`);

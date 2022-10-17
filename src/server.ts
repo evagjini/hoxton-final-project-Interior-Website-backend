@@ -222,6 +222,14 @@ app.get("/validate/designer", async (req, res) => {
   }
 });
 
+app.get("/search/:blog", async (req, res) => {
+  // @ts-ignore
+  const title = req.params.title;
+  const results = await prisma.blog.findMany({
+    where: { title: { contains: title } },
+  });
+  res.send(results);
+});
 app.listen(port, () => {
   console.log(`yay: http://localhost:${port}`);
 });

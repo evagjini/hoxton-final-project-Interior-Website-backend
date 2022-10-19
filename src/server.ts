@@ -89,6 +89,25 @@ app.get("/blog/:id", async (req, res) => {
     res.status(400).send({ error: error.message });
   }
 });
+app.get("/designer/:id", async (req, res) => {
+  try {
+    const designerId = Number(req.params.id);
+    const designer = await prisma.designer.findUnique({
+      where: { id: designerId },
+      include: {
+        blogs: true,
+      },
+    });
+    if (designer) {
+      res.send(designer);
+    } else {
+      res.send(404).send({ error: "Designer not Found!" });
+    }
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
+});
 app.get("/categories", async (req, res) => {
   try {
     const catogories = await prisma.category.findMany({
@@ -114,6 +133,28 @@ app.get("/category/:id", async (req, res) => {
     } else {
       res.status(400).send({ error: "Category not Found!" });
     }
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
+});
+app.get("/blogsForCategory/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!id) {
+      res.status(400).send({ error: "Category not Found!" });
+      return;
+    }
+    const category = await prisma.category.findUnique({
+      where: { id },
+      include: { blogs: true },
+    });
+    if (!category) {
+      res.status(400).send({ error: "Category not Found!" });
+      return;
+    }
+    res.send(category.blogs);
   } catch (error) {
     // @ts-ignore
     res.status(400).send({ error: error.message });
@@ -235,6 +276,102 @@ app.get("/search/:blog", async (req, res) => {
 app.get("/likes", async (req, res) => {
   const likes = await prisma.likes.findMany();
   res.send(likes);
+});
+// get comments
+
+app.get("/comments", async (req, res) => {
+  try {
+    const comment = await prisma.comment.findMany({
+      include: { user: true },
+    });
+    res.send(comment);
+  } catch (error) {
+    // @ts-ignore
+    res.status(404).send({ error: error.message });
+  }
+});
+
+app.post("/comments", async (req, res) => {
+  try {
+    const comment = await prisma.comment.create({
+      data: {
+        user: {
+          connect: { id: req.body.userId },
+        },
+        blog: {
+          connect: { id: req.body.blogId },
+        },
+        // @ts-ignore
+        comment: {
+          connect: { comment: req.body.userId },
+        },
+      },
+    });
+    res.send(comment);
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
+  // try {
+  //   const comment = {
+  //     blogId: req.body.blogId,
+  //     userId: req.body.userId,
+  //     comment: req.body.comment,
+  //   };
+  //   const newComment = await prisma.comment.create({
+  //     data: {
+  //       blogId: comment.blogId,
+  //       userId: comment.userId,
+  //       comment: comment.comment,
+  //     },
+  //     // include: { user: true },
+  //   });
+  //   const blog = await prisma.blog.findUnique({
+  //     where: { id: req.body.blogId },
+  //     include: {
+  //       designer: true,
+  //       likes: true,
+  //       comments: { include: { user: true } },
+  //     },
+  //   });
+  //   res.send(blog);
+  // } catch (error) {
+  //   // @ts-ignore
+  //   res.status(400).send({ error: error.message });
+  // }
+});
+// // getAfavoritedesignbyid
+app.get("/favorites/:id", async (req, res) => {
+  try {
+    const id = Number(req.params.id);
+    const favorites = await prisma.favorites.findMany({
+      where: { userId: id },
+      include: { blog: { include: { designer: true } } },
+    });
+    res.send(favorites);
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
+});
+
+app.post("/favorites", async (req, res) => {
+  try {
+    const favorite = await prisma.favorites.create({
+      data: {
+        user: {
+          connect: { id: req.body.userId },
+        },
+        blog: {
+          connect: { id: req.body.blogId },
+        },
+      },
+    });
+    res.send(favorite);
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
 });
 
 app.listen(port, () => {

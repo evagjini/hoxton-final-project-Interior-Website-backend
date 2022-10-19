@@ -11,26 +11,28 @@ datasource db {
 }
 
 model User {
-  id       Int       @id @default(autoincrement())
-  name     String
-  lastName String
-  email    String    @unique
-  password String
-  comments Comment[]
-  likes    Likes[]
+  id        Int         @id @default(autoincrement())
+  name      String
+  lastName  String
+  email     String      @unique
+  password  String
+  comments  Comment[]
+  likes     Likes[]
+  Favorites Favorites[]
 }
 
 model Blog {
-  id         Int       @id @default(autoincrement())
+  id         Int         @id @default(autoincrement())
   title      String
-  category   Category  @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  designer   Designer  @relation(fields: [designerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  category   Category    @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  designer   Designer    @relation(fields: [designerId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   designerId Int
   comments   Comment[]
   likes      Likes[]
   categoryId Int
   images     Image[]
   created_at DateTime
+  Favorites  Favorites[]
 }
 
 model Category {
@@ -71,4 +73,12 @@ model Image {
   description String
   blog        Blog   @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   blogId      Int
+}
+
+model Favorites {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  blog   Blog @relation(fields: [blogId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId Int
+  blogId Int
 }

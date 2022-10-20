@@ -120,14 +120,15 @@ app.get("/categories", async (req, res) => {
   }
 });
 
-app.get("/category/:id", async (req, res) => {
+app.get("/categories/:id", async (req, res) => {
   try {
     const id = Number(req.params.id);
 
     const category = await prisma.category.findUnique({
       where: { id: id },
-      include: { blogs: true },
+      include: { blogs: { include: { images: true } } },
     });
+
     if (category) {
       res.send(category);
     } else {
@@ -285,72 +286,72 @@ app.get("/comments", async (req, res) => {
     res.status(404).send({ error: error.message });
   }
 });
-app.post("/blogs", async (req, res) => {
-  // try {
-  //   const blog = await prisma.blog.create({
-  //     data: req.body,
-  //     include: { designer: true, images: true },
-  //   });
-  //   const blogs = await prisma.blog.findMany({
-  //     include: { designer: true, images: true },
-  //   });
-  //   res.send(blog);
-  // } catch (error) {
-  //   // @ts-ignore
-  //   res.status(400).send({ error: error.message });
-  // }
-});
-
-app.post("/comments", async (req, res) => {
-  // try {
-  //   const comment = await prisma.comment.create({
-  //     data: {
-  //       user: {
-  //         connect: { id: req.body.userId },
-  //       },
-  //       blog: {
-  //         connect: { id: req.body.blogId },
-  //       },
-  //       // @ts-ignore
-  //       comment: {
-  //         connect: { comment: req.body.userId },
-  //       },
-  //     },
-  //   });
-  //   res.send(comment);
-  // } catch (error) {
-  //   // @ts-ignore
-  //   res.status(400).send({ error: error.message });
-  // }
-  try {
-    const comment = {
-      blogId: req.body.blogId,
-      userId: req.body.userId,
-      comment: req.body.comment,
-    };
-    const newComment = await prisma.comment.create({
-      data: {
-        blogId: comment.blogId,
-        userId: comment.userId,
-        comment: comment.comment,
-      },
-      // include: { user: true },
+app.post(
+  "/blogs",
+  async (req, res) => {
+    await prisma.blog.create({
+      data: req.body,
+      include: { designer: true },
     });
-    const blog = await prisma.blog.findUnique({
-      where: { id: req.body.blogId },
+    const newDesign = await prisma.blog.findMany({
       include: {
-        images: true,
         designer: true,
-        likes: true,
-        comments: { include: { user: true } },
       },
     });
-    res.send(blog);
-  } catch (error) {
-    // @ts-ignore
-    res.status(400).send({ error: error.message });
-  }
-});
+    res.send(newDesign);
+  },
+
+  app.post("/comments", async (req, res) => {
+    // try {
+    //   const comment = await prisma.comment.create({
+    //     data: {
+    //       user: {
+    //         connect: { id: req.body.userId },
+    //       },
+    //       blog: {
+    //         connect: { id: req.body.blogId },
+    //       },
+    //       // @ts-ignore
+    //       comment: {
+    //         connect: { comment: req.body.userId },
+    //       },
+    //     },
+    //   });
+    //   res.send(comment);
+    // } catch (error) {
+    //   // @ts-ignore
+    //   res.status(400).send({ error: error.message });
+    // }
+    try {
+      const comment = {
+        blogId: req.body.blogId,
+        userId: req.body.userId,
+        comment: req.body.comment,
+      };
+      const newComment = await prisma.comment.create({
+        data: {
+          blogId: comment.blogId,
+          userId: comment.userId,
+          comment: comment.comment,
+        },
+        // include: { user: true },
+      });
+      const blog = await prisma.blog.findUnique({
+        where: { id: req.body.blogId },
+        include: {
+          images: true,
+          designer: true,
+          likes: true,
+          comments: { include: { user: true } },
+        },
+      });
+      res.send(blog);
+    } catch (error) {
+      // @ts-ignore
+      res.status(400).send({ error: error.message });
+    }
+  })
+);
 // // getAfavoritedesignbyid
 app.get("/favorites/:id", async (req, res) => {
   try {
@@ -379,6 +380,45 @@ app.post("/favorites", async (req, res) => {
       },
     });
     res.send(favorite);
+  } catch (error) {
+    // @ts-ignore
+    res.status(400).send({ error: error.message });
+  }
+});
+// get likes
+
+app.get("/likes", async (req, res) => {
+  const likes = await prisma.likes.findMany();
+  res.send(likes);
+});
+
+//  like a post
+
+app.post("/likeBlogs", async (req, res) => {
+  const like = {
+    blogId: req.body.blogId,
+    userId: req.body.userId,
+  };
+  try {
+    const likeBlog = await prisma.likes.create({
+      data: {
+        blogId: like.blogId,
+        userId: like.userId,
+      },
+      include: { blog: true },
+    });
+
+    const blog = await prisma.blog.findUnique({
+      where: { id: like.blogId },
+      include: {
+        designer: true,
+        images: true,
+        likes: true,
+        comments: { include: { user: true } },
+      },
+    });
+
+    res.send(blog);
   } catch (error) {
     // @ts-ignore
     res.status(400).send({ error: error.message });
